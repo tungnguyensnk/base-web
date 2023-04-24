@@ -22,7 +22,16 @@ const USER = {
             return res.status(400).json({message: 'DATABASE_ERROR'});
         }
     },
-
+    me: async (req, res) => {
+        try {
+            let user = await DB.getUserInfo({user_id: req.user_id});
+            user ? delete user.hash_password : null;
+            return res.status(200).json(user || {message: 'USER_NOT_FOUND'});
+        } catch (e) {
+            console.log(e);
+            return res.status(400).json({message: 'DATABASE_ERROR'});
+        }
+    },
     validate: (username, password) => {
         if (!validator.isAlphanumeric(username) || !validator.isLength(username, {min: 3, max: 20})) {
             return {message: 'USERNAME_INVALID'};
