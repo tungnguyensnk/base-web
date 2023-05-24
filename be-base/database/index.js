@@ -8,8 +8,10 @@ const DB = {
         user_id ? subQuery = `WHERE id = ${user_id}` : subQuery = `WHERE username = '${username}'`;
 
         return new Promise((resolve) => {
-            db.get(`SELECT *
-                    FROM users ${subQuery}`, (err, row) => {
+            db.get(`SELECT u.username, u.role, u.hash_password, ui.*
+                    FROM users u
+                             JOIN user_infos ui on u.id = ui.user_id
+                        ${subQuery}`, (err, row) => {
                 if (err) console.log(err);
                 resolve(row);
             });
@@ -22,7 +24,28 @@ const DB = {
                     VALUES ('${username}', '${hash_password}', 0)
                     returning id`, (err, row) => {
                 if (err) console.log(err);
-                resolve(row.id);
+                db.run(`INSERT INTO user_infos (user_id)
+                        VALUES (${row.id})`, (err) => {
+                    if (err) console.log(err);
+                    resolve(row.id);
+                });
+            });
+        });
+    },
+    updateUserInfos: async (user_id, {full_name, email, phone, address}) => {
+        let subQuery = '';
+        if (full_name) subQuery += `full_name = '${full_name}',`;
+        if (email) subQuery += `email = '${email}',`;
+        if (phone) subQuery += `phone = '${phone}',`;
+        if (address) subQuery += `address = '${address}',`;
+        subQuery = subQuery.slice(0, -1);
+
+        return new Promise((resolve) => {
+            db.run(`UPDATE user_infos
+                    SET ${subQuery}
+                    WHERE user_id = ${user_id}`, (err) => {
+                if (err) console.log(err);
+                resolve();
             });
         });
     },

@@ -1,7 +1,8 @@
 let LINK = process.env.LINK || 'http://localhost:9999';
-const api = (url, method, body) => {
+const api = async (url, method, body) => {
     let myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
+
     let token = localStorage.getItem('token');
     if (token)
         myHeaders.append("Authorization", "Bearer " + token);
@@ -14,7 +15,10 @@ const api = (url, method, body) => {
         body: JSON.stringify(body)
     };
 
-    return fetch(LINK + url, requestOptions)
+    let response = await fetch(LINK + url, requestOptions);
+    let result = await response.json();
+    result.status = response.status;
+    return result;
 }
 
 export default api;

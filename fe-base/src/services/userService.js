@@ -15,8 +15,9 @@ const USER = {
     },
     login: async (username, password) => {
         let result = await api('/user/login', 'POST', {username, password});
-        if (result.message === 'LOGIN_SUCCESS')
+        if (result.message === 'LOGIN_SUCCESS') {
             localStorage.setItem('token', result.token);
+        }
         return result;
     },
     logout: async () => {

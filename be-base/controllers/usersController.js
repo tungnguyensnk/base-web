@@ -19,7 +19,7 @@ const USER = {
             return res.status(200).json(user || {message: 'USER_NOT_FOUND'});
         } catch (e) {
             console.log(e);
-            return res.status(400).json({message: 'DATABASE_ERROR'});
+            return res.status(500).json({message: 'DATABASE_ERROR'});
         }
     },
     me: async (req, res) => {
@@ -29,10 +29,32 @@ const USER = {
             return res.status(200).json(user || {message: 'USER_NOT_FOUND'});
         } catch (e) {
             console.log(e);
-            return res.status(400).json({message: 'DATABASE_ERROR'});
+            return res.status(500).json({message: 'DATABASE_ERROR'});
+        }
+    },
+    updateInfo: async (req, res) => {
+        let user_id = req.user_id;
+        let full_name = req.body.full_name || null;
+        let email = req.body.email || null;
+        let phone = req.body.phone || null;
+        let address = req.body.address || null;
+
+        if (full_name === null && email === null && phone === null && address === null) {
+            return res.status(400).json({message: 'BAD_REQUEST'});
+        }
+        try {
+            await DB.updateUserInfos(user_id, {full_name, email, phone, address});
+            return res.status(200).json({message: 'UPDATE_SUCCESS'});
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({message: 'DATABASE_ERROR'});
         }
     },
     validate: (username, password) => {
+        if (!username)
+            return {message: 'USERNAME_REQUIRED'};
+        if (!password)
+            return {message: 'PASSWORD_REQUIRED'};
         if (!validator.isAlphanumeric(username) || !validator.isLength(username, {min: 3, max: 20})) {
             return {message: 'USERNAME_INVALID'};
         }
@@ -55,7 +77,7 @@ const USER = {
         try {
             let user = await DB.getUserInfo({username});
             if (user) {
-                return res.status(200).json({message: 'USERNAME_EXISTS'});
+                return res.status(400).json({message: 'USERNAME_EXISTS'});
             }
 
             const hash = await bcrypt.hash(password, 10);
@@ -70,7 +92,7 @@ const USER = {
     },
 
     login: async (req, res) => {
-        let username = req.body.username;
+        let username = req.body.username
         let password = req.body.password;
 
         let error = USER.validate(username, password);
@@ -88,10 +110,10 @@ const USER = {
                     await DB.addSession(user_id, token);
                     return res.status(200).json({message: 'LOGIN_SUCCESS', user_id, token});
                 } else {
-                    return res.status(200).json({message: 'LOGIN_FAIL'});
+                    return res.status(400).json({message: 'LOGIN_FAIL'});
                 }
             } else {
-                return res.status(200).json({message: 'LOGIN_FAIL'});
+                return res.status(400).json({message: 'LOGIN_FAIL'});
             }
         } catch (e) {
             console.log(e);
@@ -122,10 +144,10 @@ const USER = {
                     await DB.changePassword(user_id, hash);
                     return res.status(200).json({message: 'PASSWORD_CHANGED'});
                 } else {
-                    return res.status(200).json({message: 'PASSWORD_NOT_MATCH'});
+                    return res.status(400).json({message: 'PASSWORD_NOT_MATCH'});
                 }
             } else {
-                return res.status(200).json({message: 'USER_NOT_FOUND'});
+                return res.status(400).json({message: 'USER_NOT_FOUND'});
             }
         } catch (e) {
             console.log(e);
@@ -154,7 +176,7 @@ const USER = {
                 await DB.setRole(user_id, role);
                 return res.status(200).json({message: 'ROLE_CHANGED'});
             } else {
-                return res.status(200).json({message: 'USER_NOT_FOUND'});
+                return res.status(400).json({message: 'USER_NOT_FOUND'});
             }
         } catch (e) {
             console.log(e);
