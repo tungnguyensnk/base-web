@@ -7,12 +7,13 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@popperjs/core": "^2.11.7",
     "bootstrap": "^5.2.3",
-    "bootstrap-icons": "^1.10.4",
-    "jquery": "^3.6.4",
+    "bootstrap-icons": "^1.10.5",
     "react": "^18.2.0",
+    "react-async": "^10.0.1",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.10.0",
-    "react-scripts": "5.0.1"
+    "react-router-dom": "^6.11.2",
+    "react-scripts": "^5.0.1",
+    "remotion": "^3.3.96"
   },
   "scripts": {
     "start": "react-scripts start",
