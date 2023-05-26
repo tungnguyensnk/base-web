@@ -1,26 +1,34 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import USER from "../services/userService";
 import {Navigate} from "react-router-dom";
-import {continueRender, delayRender} from "remotion";
 
 const Auth = (props) => {
-    let [role, setRole] = React.useState(null);
-    const [handle] = useState(() => delayRender());
+    let role = useRef(ROLE.GUEST);
+    const [handle, setHandle] = useState(false);
 
     useEffect(() => {
         (async () => {
             let result = await USER.me();
             if (result.user_id) {
-                setRole(result.role);
+                role.current = result.role;
             } else {
-                setRole(ROLE.GUEST);
+                role.current = ROLE.GUEST;
             }
-            continueRender(handle);
+            setHandle(true);
         })();
     }, []);
-    if (props.role === ROLE.GUEST && role !== ROLE.GUEST) return <Navigate to={props.path}/>;
+
+    if (handle === false)
+        return (<> </>);
     return (
-        role < props.role ? <Navigate to={props.path}/> : props.children
+        <>
+            {(props.role === ROLE.GUEST && role.current !== ROLE.GUEST) ?
+                <Navigate to={props.path}/> :
+                role.current < props.role ?
+                    <Navigate to={props.path}/> :
+                    props.children
+            }
+        </>
     )
 }
 export default Auth;
